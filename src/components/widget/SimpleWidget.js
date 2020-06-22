@@ -1,23 +1,22 @@
 import React from 'react';
 import Styled from '@emotion/styled';
-import { css } from '@emotion/core';
 
-function PopularTopics() {
+function SimpleWidget({ widgetData, widgetTitle }) {
     return (
-        <PopularTopicsStyled>
+        <SimpleWidgetStyled>
             <div className="widget-header">
-                <h2>Popular Topic</h2>
+                <h2>{widgetTitle}</h2>
             </div>
             <ul>
-                <li>Typescript</li>
-                <li>React.js</li>
-                <li>RxJs</li>
+                {widgetData.map((data, index) => {
+                    return <li key={index}>{data.list}</li>;
+                })}
             </ul>
-        </PopularTopicsStyled>
+        </SimpleWidgetStyled>
     );
 }
 
-const PopularTopicsStyled = Styled.div`
+const SimpleWidgetStyled = Styled.div`
     background-color:#f0f1f3;
     border-radius: .5rem;
     padding: .25rem 0;
@@ -46,4 +45,4 @@ const PopularTopicsStyled = Styled.div`
         }
 `;
 
-export default PopularTopics;
+export default SimpleWidget;

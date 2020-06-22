@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLSchema } from 'graphql';
+import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLSchema, GraphQLList } from 'graphql';
 
 // Import Mongoose Schema
 import User from '../models/user.model';
@@ -20,6 +20,12 @@ const RootQuery = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
                 return User.findById(args.id);
+            },
+        },
+        users: {
+            type: new GraphQLList(UserType),
+            resolve(parent, args) {
+                return User.find();
             },
         },
     },

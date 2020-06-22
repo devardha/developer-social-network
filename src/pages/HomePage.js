@@ -1,13 +1,13 @@
 import React from 'react';
 import Styled from '@emotion/styled';
-import { css } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 import ToFollow from '../components/ToFollow';
-import WriteStatus from '../components/WriteStatus';
 import Feeds from '../components/Feeds';
-import data from '../assets/dummyData.json';
-import PopularTopics from '../components/widget/PopularTopic';
-import PopularForums from '../components/widget/PopularForum';
+import SimpleWidget from '../components/widget/SimpleWidget';
+
+// Import Static Data
+import data from '../assets/data/dummyData.json';
+import { popularForums, popularTopics } from '../assets/data/widgetData';
 
 function HomePage() {
     const head = () => {
@@ -36,8 +36,8 @@ function HomePage() {
             {head()}
             <div className="container">
                 <div css={sideContent}>
-                    <PopularTopics />
-                    <PopularForums />
+                    <SimpleWidget widgetTitle="Popular Forum" widgetData={popularForums} />
+                    <SimpleWidget widgetTitle="Popular Topics" widgetData={popularTopics} />
                 </div>
                 <main css={mainContent}>
                     {data.map((user, index) => (

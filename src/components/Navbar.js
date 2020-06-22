@@ -19,7 +19,7 @@ function Navbar() {
     return (
         <NavbarStyled>
             <div className="navbar-brand">
-                <span className="nav-title">devspace.com</span>
+                <span className="nav-title">Devspace</span>
             </div>
             <div className="search-box">
                 <input type="text" placeholder="Search" />
