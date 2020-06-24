@@ -1,24 +1,33 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-require('dotenv').config();
+import fetch from 'node-fetch';
 
+// React
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
 import App from './src/App';
 import { Helmet } from 'react-helmet';
 
-import schema from './graphql/schema';
-import graphqlHTTP from 'express-graphql';
+// Mongoose
 import mongoose from 'mongoose';
 
-// Apollo Server-Side Rendering
+// Apollo GraphQL
 import { ApolloProvider } from '@apollo/react-common';
 import { ApolloClient } from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
-import fetch from 'node-fetch';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { getDataFromTree } from '@apollo/react-ssr';
+import { ApolloServer } from 'apollo-server-express';
+
+import typeDefs from './graphql/typeDefs';
+import resolvers from './graphql/resolvers';
+
+// Mongoose Schema
+import User from './models/user.model';
+
+require('dotenv').config();
+const expressPlayground = require('graphql-playground-middleware-express').default;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,18 +41,20 @@ mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
+        dbName: process.env.DB_NAME,
     })
     .then(() => console.log('Database connected...'))
     .catch((err) => console.log(err));
 
-// Graphql Endpoint
-app.use(
-    '/graphql',
-    graphqlHTTP({
-        schema,
-        graphiql: true,
-    }),
-);
+// Defining Apollo Server
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req, res }) => ({ req, res }),
+});
+
+server.applyMiddleware({ app });
+app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
 
 app.get('*', (req, res) => {
     const context = {};
@@ -96,8 +107,6 @@ app.get('*', (req, res) => {
     }
 
     getDataFromTree(app).then(() => {
-        // We are ready to render for real
-
         res.status(200);
         res.send(`${markup}`);
     });
