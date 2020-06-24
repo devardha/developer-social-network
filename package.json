@@ -28,6 +28,7 @@
         "express-session": "^1.17.1",
         "graphql": "^15.1.0",
         "graphql-playground-middleware-express": "^1.7.18",
+        "jsonwebtoken": "^8.5.1",
         "mongoose": "^5.9.19",
         "node-fetch": "^2.6.0",
         "nodemon": "^2.0.4",
@@ -40,8 +41,7 @@
         "react-html-parser": "^2.0.2",
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
-        "url-loader": "^4.1.0",
-        "uuid": "^8.1.0"
+        "url-loader": "^4.1.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.10.1",

@@ -18,14 +18,6 @@ const typeDefs = gql`
         users: [User]
         user(id: ID!): User!
     }
-
-    type AuthPayload {
-        user: User
-    }
-
-    type Mutation {
-        login(email: String!, password: String!): AuthPayload
-    }
 `;
 
 export default typeDefs;

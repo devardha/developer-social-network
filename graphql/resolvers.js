@@ -10,12 +10,6 @@ const resolvers = {
             return User.findById(id);
         },
     },
-    Mutation: {
-        login: async (parent, { email, password }, context) => {
-            const { user } = await User.findOne({ email, password });
-            return { user };
-        },
-    },
 };
 
 export default resolvers;
