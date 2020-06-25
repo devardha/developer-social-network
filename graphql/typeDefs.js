@@ -18,6 +18,11 @@ const typeDefs = gql`
         users: [User]
         user(id: ID!): User!
     }
+
+    type Mutation {
+        register(name: String, username: String, email: String, password: String): String
+        login(username: String, password: String): String
+    }
 `;
 
 export default typeDefs;

@@ -12,7 +12,7 @@ const ButtonStyled = Styled.button`
     border-radius: 2rem;
     padding: .75rem 1.25rem;
     font-size:.9rem;
-
+    cursor:pointer;
 `;
 
 export default Button;

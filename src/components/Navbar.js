@@ -11,8 +11,12 @@ function Navbar() {
 
     const guessUser = (
         <>
-            <Button className="btn btn-primary">Log In</Button>
-            <Button className="btn">Sign Up</Button>
+            <NavLink to="/login">
+                <Button className="btn btn-primary">Log In</Button>
+            </NavLink>
+            <Button className="btn" onClick={() => console.log('test')}>
+                Sign Up
+            </Button>
         </>
     );
 

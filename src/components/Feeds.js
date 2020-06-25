@@ -4,22 +4,7 @@ import { css } from '@emotion/core';
 import { ThumbsUp, MessageSquare, Bookmark } from 'react-feather';
 import ReactHtmlParser from 'react-html-parser';
 
-import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
-
-const GET_USERS = gql`
-    {
-        users {
-            id
-            username
-            email
-        }
-    }
-`;
-
 function Feeds({ name, username, body, profile_picture, date }) {
-    const { loading, error, data } = useQuery(GET_USERS);
-
     return (
         <FeedsStyled>
             <div className="feed-header">
