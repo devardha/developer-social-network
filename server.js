@@ -22,6 +22,7 @@ import { ApolloServer } from 'apollo-server-express';
 import passport from 'passport';
 import User from './models/user.model';
 const GitHubStrategy = require('passport-github').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
@@ -56,7 +57,7 @@ const server = new ApolloServer({
 server.applyMiddleware({ app });
 app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
 
-// Github Strategy ==============================
+// Passport Authentication
 passport.serializeUser(function (user, cb) {
     cb(null, user);
 });
@@ -78,6 +79,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Github Passport ==============================
 passport.use(
     new GitHubStrategy(
         {
@@ -86,14 +88,14 @@ passport.use(
             callbackURL: 'http://localhost:3000/auth/github/callback',
             scope: 'user:email',
         },
-        function (accessToken, refreshToken, profile, cb) {
+        async function (accessToken, refreshToken, profile, cb) {
             const name = profile.displayName;
             const username = profile.username;
             const avatar = profile.photos[0].value;
             const githubID = profile.id;
             const email = profile.emails[0].value;
 
-            const existingUser = User.findOne({ social_login: { github: githubID } });
+            const existingUser = await User.findOne({ email: email });
 
             if (existingUser) {
                 User.findOne({ username }, function (err, user) {
@@ -129,7 +131,61 @@ app.get(
         res.redirect('/home');
     },
 );
-// Github Strategy ==============================
+// Github Passport ==============================
+
+// Google Passport ==============================
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get(
+    '/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/register' }),
+    function (req, res) {
+        res.redirect('/home');
+    },
+);
+
+passport.use(
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENTID,
+            clientSecret: process.env.GOOGLE_CLIENTSECRET,
+            callbackURL: 'http://localhost:3000/auth/google/callback',
+        },
+        async function (accessToken, refreshToken, profile, cb) {
+            const name = profile.displayName;
+            const username = profile.name.givenName.replace(/\s+/g, '').toLowerCase();
+            const avatar = profile.photos[0].value;
+            const email = profile.emails[0].value;
+            const googleID = profile.id;
+
+            const existingUser = await User.findOne({ email: email });
+
+            if (existingUser) {
+                User.findOne({ username }, function (err, user) {
+                    return cb(err, user);
+                });
+            }
+
+            if (!existingUser) {
+                User.create(
+                    {
+                        name,
+                        username,
+                        avatar,
+                        email,
+                        social_login: {
+                            google: googleID,
+                        },
+                    },
+                    function (err, user) {
+                        return cb(err, user);
+                    },
+                );
+            }
+        },
+    ),
+);
+// Google Passport ==============================
 
 app.get('*', (req, res) => {
     const context = {};

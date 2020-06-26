@@ -18,7 +18,7 @@ function RegisterPage() {
             <form>
                 <h2>Login</h2>
                 <div className="social-login">
-                    <a href="/auth/google" className="social-login-btn">
+                    <a href="http://localhost:3000/auth/google" className="social-login-btn">
                         <i className="google-icon"></i>
                         <span>Google</span>
                     </a>
