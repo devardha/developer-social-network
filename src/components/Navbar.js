@@ -14,9 +14,9 @@ function Navbar() {
             <NavLink to="/login">
                 <Button className="btn btn-primary">Log In</Button>
             </NavLink>
-            <Button className="btn" onClick={() => console.log('test')}>
-                Sign Up
-            </Button>
+            <NavLink to="/register">
+                <Button className="btn">Sign Up</Button>
+            </NavLink>
         </>
     );
 

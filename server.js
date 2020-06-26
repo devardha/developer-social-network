@@ -19,12 +19,12 @@ import { createHttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { getDataFromTree } from '@apollo/react-ssr';
 import { ApolloServer } from 'apollo-server-express';
+import passport from 'passport';
+import User from './models/user.model';
+const GitHubStrategy = require('passport-github').Strategy;
 
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
-
-// Mongoose Schema
-import User from './models/user.model';
 
 require('dotenv').config();
 const expressPlayground = require('graphql-playground-middleware-express').default;
@@ -55,6 +55,81 @@ const server = new ApolloServer({
 
 server.applyMiddleware({ app });
 app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
+
+// Github Strategy ==============================
+passport.serializeUser(function (user, cb) {
+    cb(null, user);
+});
+
+passport.deserializeUser(function (obj, cb) {
+    cb(null, obj);
+});
+
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(
+    require('express-session')({
+        secret: process.env.SECRET,
+        resave: true,
+        saveUninitialized: true,
+    }),
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+    new GitHubStrategy(
+        {
+            clientID: process.env.GITHUB_CLIENTID,
+            clientSecret: process.env.GITHUB_CLIENTSECRET,
+            callbackURL: 'http://localhost:3000/auth/github/callback',
+            scope: 'user:email',
+        },
+        function (accessToken, refreshToken, profile, cb) {
+            const name = profile.displayName;
+            const username = profile.username;
+            const avatar = profile.photos[0].value;
+            const githubID = profile.id;
+            const email = profile.emails[0].value;
+
+            const existingUser = User.findOne({ social_login: { github: githubID } });
+
+            if (existingUser) {
+                User.findOne({ username }, function (err, user) {
+                    return cb(err, user);
+                });
+            }
+
+            if (!existingUser) {
+                User.create(
+                    {
+                        name,
+                        username,
+                        avatar,
+                        email,
+                        social_login: {
+                            github: githubID,
+                        },
+                    },
+                    function (err, user) {
+                        return cb(err, user);
+                    },
+                );
+            }
+        },
+    ),
+);
+
+app.get('/auth/github', passport.authenticate('github'));
+app.get(
+    '/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/register' }),
+    function (req, res) {
+        res.redirect('/home');
+    },
+);
+// Github Strategy ==============================
 
 app.get('*', (req, res) => {
     const context = {};

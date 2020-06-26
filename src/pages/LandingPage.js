@@ -27,20 +27,13 @@ function LandingPage() {
     return (
         <LandingPageStyled>
             {head()}
-            <div className="container">
-                <div className="hero"></div>
-            </div>
+            <div className="container"></div>
         </LandingPageStyled>
     );
 }
 
 const LandingPageStyled = Styled.div`
-    .hero{
-        width:100%;
-        height:400px;
-        background-color:#eee;
-        border-radius:2rem;
-    }
+
 `;
 
 export default LandingPage;

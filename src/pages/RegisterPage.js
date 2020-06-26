@@ -1,47 +1,73 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Styled from '@emotion/styled';
 import Field from '../components/form/Field';
 import Input from '../components/form/Input';
 import Button from '../components/Button';
+import { Link } from 'react-router-dom';
 
-function LoginPage() {
+function RegisterPage() {
+    const [name, setName] = useState('');
+    const [username, setUserName] = useState(name);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    // console.log({ name, username, email, password });
+
     return (
-        <LoginPageStyled>
+        <RegisterPageStyled>
             <form>
                 <h2>Login</h2>
                 <div className="social-login">
-                    <Button className="social-login-btn">
+                    <a href="/auth/google" className="social-login-btn">
                         <i className="google-icon"></i>
                         <span>Google</span>
-                    </Button>
-                    <Button className="social-login-btn">
+                    </a>
+                    <a href="http://localhost:3000/auth/github" className="social-login-btn">
                         <img
                             className="github-icon"
                             src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMGMtNi42MjYgMC0xMiA1LjM3My0xMiAxMiAwIDUuMzAyIDMuNDM4IDkuOCA4LjIwNyAxMS4zODcuNTk5LjExMS43OTMtLjI2MS43OTMtLjU3N3YtMi4yMzRjLTMuMzM4LjcyNi00LjAzMy0xLjQxNi00LjAzMy0xLjQxNi0uNTQ2LTEuMzg3LTEuMzMzLTEuNzU2LTEuMzMzLTEuNzU2LTEuMDg5LS43NDUuMDgzLS43MjkuMDgzLS43MjkgMS4yMDUuMDg0IDEuODM5IDEuMjM3IDEuODM5IDEuMjM3IDEuMDcgMS44MzQgMi44MDcgMS4zMDQgMy40OTIuOTk3LjEwNy0uNzc1LjQxOC0xLjMwNS43NjItMS42MDQtMi42NjUtLjMwNS01LjQ2Ny0xLjMzNC01LjQ2Ny01LjkzMSAwLTEuMzExLjQ2OS0yLjM4MSAxLjIzNi0zLjIyMS0uMTI0LS4zMDMtLjUzNS0xLjUyNC4xMTctMy4xNzYgMCAwIDEuMDA4LS4zMjIgMy4zMDEgMS4yMy45NTctLjI2NiAxLjk4My0uMzk5IDMuMDAzLS40MDQgMS4wMi4wMDUgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="
                         />
                         <span>Github</span>
-                    </Button>
+                    </a>
                 </div>
                 <Field>
                     <label htmlFor="name">Name</label>
-                    <Input placeholder="Name" name="name" type="text" />
+                    <Input
+                        placeholder="Name"
+                        name="name"
+                        type="text"
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setUserName(e.target.value.replace(/\s+/g, '').toLowerCase());
+                        }}
+                    />
                 </Field>
                 <Field>
                     <label htmlFor="email">Email</label>
-                    <Input placeholder="Email" name="email" type="email" />
+                    <Input
+                        placeholder="Email"
+                        name="email"
+                        type="email"
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
                 </Field>
                 <Field>
                     <label htmlFor="password">Password</label>
-                    <Input placeholder="Password" name="password" type="password" />
+                    <Input
+                        placeholder="Password"
+                        name="password"
+                        type="password"
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
                 </Field>
                 <Button className="signup-btn">Sign Up</Button>
                 <p className="message">Alreaady have an account? login here</p>
             </form>
-        </LoginPageStyled>
+        </RegisterPageStyled>
     );
 }
 
-const LoginPageStyled = Styled.div`
+const RegisterPageStyled = Styled.div`
     display:flex;
     justify-content:center;
     align-items:center;
@@ -53,7 +79,10 @@ const LoginPageStyled = Styled.div`
         justify-content:space-between;
 
         .social-login-btn{
+            padding: .75rem 1.25rem;
+            font-size: .9rem;
             width:49%;
+            cursor: pointer;
             border-radius:.3rem;
             background-color:#fff;
             color:#000;
@@ -108,4 +137,4 @@ const LoginPageStyled = Styled.div`
     }
 `;
 
-export default LoginPage;
+export default RegisterPage;

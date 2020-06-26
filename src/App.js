@@ -9,7 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 class App extends Component {
     render() {
@@ -29,11 +29,11 @@ class App extends Component {
                     />
                     <Route
                         exact
-                        path="/login"
+                        path="/register"
                         render={(props) => {
                             return (
                                 <div>
-                                    <LoginPage {...props} />
+                                    <RegisterPage {...props} />
                                 </div>
                             );
                         }}
