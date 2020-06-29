@@ -3,67 +3,172 @@ import Styled from '@emotion/styled';
 import Field from '../components/form/Field';
 import Input from '../components/form/Input';
 import Button from '../components/Button';
-import { Link } from 'react-router-dom';
+import Label from '../components/form/Label';
+import gql from 'graphql-tag';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import { Mutation } from 'react-apollo';
+import { Helmet } from 'react-helmet';
+import { Link, useHistory } from 'react-router-dom';
+
+const ADD_USER = gql`
+    mutation register($username: String, $email: String, $password: String) {
+        register(username: $username, email: $email, password: $password)
+    }
+`;
 
 function RegisterPage() {
-    const [name, setName] = useState('');
-    const [username, setUserName] = useState(name);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [errorMsg, setErrorMsg] = useState();
+    const history = useHistory();
 
-    // console.log({ name, username, email, password });
+    const head = () => {
+        return (
+            <Helmet>
+                <title>Login - Devspace</title>
+                <meta
+                    name="description"
+                    content="Space where developers show their works and help each other to grow."
+                />
+                <meta name="og:title" content="Home - MyDevSpace" />
+                <meta
+                    name="og:description"
+                    content="Space where developers show their works and help each other to grow."
+                />
+                <meta
+                    name="og:image"
+                    content="https://miro.medium.com/max/1200/1*aLg1-G2UAlaKpBopRnmCRg.png"
+                />
+            </Helmet>
+        );
+    };
 
     return (
-        <RegisterPageStyled>
-            <form>
-                <h2>Login</h2>
-                <div className="social-login">
-                    <a href="http://localhost:3000/auth/google" className="social-login-btn">
-                        <i className="google-icon"></i>
-                        <span>Google</span>
-                    </a>
-                    <a href="http://localhost:3000/auth/github" className="social-login-btn">
-                        <img
-                            className="github-icon"
-                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMGMtNi42MjYgMC0xMiA1LjM3My0xMiAxMiAwIDUuMzAyIDMuNDM4IDkuOCA4LjIwNyAxMS4zODcuNTk5LjExMS43OTMtLjI2MS43OTMtLjU3N3YtMi4yMzRjLTMuMzM4LjcyNi00LjAzMy0xLjQxNi00LjAzMy0xLjQxNi0uNTQ2LTEuMzg3LTEuMzMzLTEuNzU2LTEuMzMzLTEuNzU2LTEuMDg5LS43NDUuMDgzLS43MjkuMDgzLS43MjkgMS4yMDUuMDg0IDEuODM5IDEuMjM3IDEuODM5IDEuMjM3IDEuMDcgMS44MzQgMi44MDcgMS4zMDQgMy40OTIuOTk3LjEwNy0uNzc1LjQxOC0xLjMwNS43NjItMS42MDQtMi42NjUtLjMwNS01LjQ2Ny0xLjMzNC01LjQ2Ny01LjkzMSAwLTEuMzExLjQ2OS0yLjM4MSAxLjIzNi0zLjIyMS0uMTI0LS4zMDMtLjUzNS0xLjUyNC4xMTctMy4xNzYgMCAwIDEuMDA4LS4zMjIgMy4zMDEgMS4yMy45NTctLjI2NiAxLjk4My0uMzk5IDMuMDAzLS40MDQgMS4wMi4wMDUgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="
-                        />
-                        <span>Github</span>
-                    </a>
-                </div>
-                <Field>
-                    <label htmlFor="name">Name</label>
-                    <Input
-                        placeholder="Name"
-                        name="name"
-                        type="text"
-                        onChange={(e) => {
-                            setName(e.target.value);
-                            setUserName(e.target.value.replace(/\s+/g, '').toLowerCase());
+        <Mutation mutation={ADD_USER}>
+            {(register, { data }) => (
+                <RegisterPageStyled>
+                    {head()}
+                    <Formik
+                        initialValues={{
+                            username: '',
+                            email: '',
+                            password: '',
                         }}
-                    />
-                </Field>
-                <Field>
-                    <label htmlFor="email">Email</label>
-                    <Input
-                        placeholder="Email"
-                        name="email"
-                        type="email"
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </Field>
-                <Field>
-                    <label htmlFor="password">Password</label>
-                    <Input
-                        placeholder="Password"
-                        name="password"
-                        type="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </Field>
-                <Button className="signup-btn">Sign Up</Button>
-                <p className="message">Alreaady have an account? login here</p>
-            </form>
-        </RegisterPageStyled>
+                        validationSchema={Yup.object().shape({
+                            username: Yup.string()
+                                .required('Username is required')
+                                .min(3, 'Username is too short'),
+                            password: Yup.string()
+                                .required('Password is required')
+                                .min(8, 'Password is to short'),
+                            email: Yup.string()
+                                .email('Email is invalidd')
+                                .required('Email is required'),
+                        })}
+                        onSubmit={async (values, { resetForm }) => {
+                            try {
+                                const response = await register({
+                                    variables: values,
+                                });
+                                resetForm();
+                                history.push('/home');
+                            } catch (err) {
+                                setErrorMsg(err.graphQLErrors[0].message);
+                            }
+                        }}
+                    >
+                        {({ errors, status, touched, getFieldProps }) => (
+                            <Form>
+                                <h2>Login</h2>
+                                <p className="message">
+                                    Alreaady have an account? login <Link to="/login">here</Link>
+                                </p>
+                                <div className="social-login">
+                                    <a
+                                        href="http://localhost:3000/auth/google"
+                                        className="social-login-btn"
+                                    >
+                                        <i className="google-icon"></i>
+                                        <span>Google</span>
+                                    </a>
+                                    <a
+                                        href="http://localhost:3000/auth/github"
+                                        className="social-login-btn"
+                                    >
+                                        <img
+                                            className="github-icon"
+                                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMGMtNi42MjYgMC0xMiA1LjM3My0xMiAxMiAwIDUuMzAyIDMuNDM4IDkuOCA4LjIwNyAxMS4zODcuNTk5LjExMS43OTMtLjI2MS43OTMtLjU3N3YtMi4yMzRjLTMuMzM4LjcyNi00LjAzMy0xLjQxNi00LjAzMy0xLjQxNi0uNTQ2LTEuMzg3LTEuMzMzLTEuNzU2LTEuMzMzLTEuNzU2LTEuMDg5LS43NDUuMDgzLS43MjkuMDgzLS43MjkgMS4yMDUuMDg0IDEuODM5IDEuMjM3IDEuODM5IDEuMjM3IDEuMDcgMS44MzQgMi44MDcgMS4zMDQgMy40OTIuOTk3LjEwNy0uNzc1LjQxOC0xLjMwNS43NjItMS42MDQtMi42NjUtLjMwNS01LjQ2Ny0xLjMzNC01LjQ2Ny01LjkzMSAwLTEuMzExLjQ2OS0yLjM4MSAxLjIzNi0zLjIyMS0uMTI0LS4zMDMtLjUzNS0xLjUyNC4xMTctMy4xNzYgMCAwIDEuMDA4LS4zMjIgMy4zMDEgMS4yMy45NTctLjI2NiAxLjk4My0uMzk5IDMuMDAzLS40MDQgMS4wMi4wMDUgMi4wNDcuMTM4IDMuMDA2LjQwNCAyLjI5MS0xLjU1MiAzLjI5Ny0xLjIzIDMuMjk3LTEuMjMuNjUzIDEuNjUzLjI0MiAyLjg3NC4xMTggMy4xNzYuNzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2IDQuNzY1LTEuNTg5IDguMTk5LTYuMDg2IDguMTk5LTExLjM4NiAwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg=="
+                                        />
+                                        <span>Github</span>
+                                    </a>
+                                </div>
+                                {errorMsg ? (
+                                    <>
+                                        <div className="alert">
+                                            <p>{errorMsg}</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    ''
+                                )}
+                                <Field>
+                                    <Label
+                                        htmlFor="username"
+                                        error={touched.username && errors.username}
+                                    >
+                                        Username
+                                    </Label>
+                                    <Input
+                                        placeholder="Username"
+                                        name="username"
+                                        type="text"
+                                        id="nausernameme"
+                                        {...getFieldProps('username')}
+                                        error={errors.username}
+                                        className={errors.username ? 'input-error' : ''}
+                                    />
+                                </Field>
+                                <Field>
+                                    <Label htmlFor="email" error={touched.email && errors.email}>
+                                        Email
+                                    </Label>
+                                    <Input
+                                        placeholder="Email"
+                                        name="email"
+                                        type="email"
+                                        id="email"
+                                        {...getFieldProps('email')}
+                                        error={errors.email}
+                                    />
+                                </Field>
+                                <Field>
+                                    <Label
+                                        htmlFor="password"
+                                        error={touched.password && errors.password}
+                                    >
+                                        Password
+                                    </Label>
+                                    <Input
+                                        placeholder="Password"
+                                        name="password"
+                                        type="password"
+                                        id="password"
+                                        {...getFieldProps('password')}
+                                        error={errors.password}
+                                    />
+                                </Field>
+                                <p className="message">
+                                    By clicking Create Account you agree to our{' '}
+                                    <a>User Agreement</a>, Privacy Policy, and Cookie Policy.
+                                </p>
+                                <Button className="signup-btn" type="submit">
+                                    Create Account
+                                </Button>
+                            </Form>
+                        )}
+                    </Formik>
+                </RegisterPageStyled>
+            )}
+        </Mutation>
     );
 }
 
@@ -72,6 +177,20 @@ const RegisterPageStyled = Styled.div`
     justify-content:center;
     align-items:center;
     height:100vh;
+
+    .alert{
+        background: #ffeff6;
+        padding: 0 1rem;
+        color: #de196b;
+        font-size: .9rem;
+        border: 1px solid #de196b1f;
+        text-align: center;
+        border-radius: .3rem;
+    }
+
+    .input-error{
+        border: 1px solid #f33584 !important;
+    }
 
     .social-login{
         display:flex;
@@ -107,18 +226,16 @@ const RegisterPageStyled = Styled.div`
             }
         }
     }
-
-    label{
-        color:#666;
-        font-size:.9rem;
-    }
     .signup-btn{
         width:100%;
+        margin-top:.5rem;
     }
 
     h2{
         font-size:2rem;
         text-align:center;
+        margin-top:.5rem;
+        margin-bottom:1rem;
     }
 
     form{
@@ -128,8 +245,9 @@ const RegisterPageStyled = Styled.div`
         background-color:#fff;
 
         .message{
-            font-size:.9rem;
-            margin-top:.75rem;
+            font-size:.8rem;
+            margin-top:1rem;
+            line-height:20px;
             display:block;
             color:#666;
             text-align:center;

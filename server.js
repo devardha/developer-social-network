@@ -89,7 +89,7 @@ passport.use(
             scope: 'user:email',
         },
         async function (accessToken, refreshToken, profile, cb) {
-            const name = profile.displayName;
+            const name = profile.displayName ? profile.displayName : profile.username;
             const username = profile.username;
             const avatar = profile.photos[0].value;
             const githubID = profile.id;

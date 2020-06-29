@@ -26,7 +26,6 @@ const resolvers = {
             const hashedPassword = bcrypt.hashSync(args.password, saltRounds);
 
             const newUser = await User.create({
-                name: args.name,
                 username: args.username,
                 email: args.email,
                 password: hashedPassword,
