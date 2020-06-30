@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 import Navbar from './components/Navbar';
-import { ApolloClient } from 'apollo-boost';
+import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
 import fetch from 'node-fetch';
@@ -11,7 +11,7 @@ const client = new ApolloClient({
     link: createHttpLink({
         uri: 'http://localhost:3000/graphql',
         fetch: fetch,
-        credentials: 'same-origin',
+        credentials: 'include',
     }),
     cache: new InMemoryCache(),
 });

@@ -1,6 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import fetch from 'node-fetch';
+import cookieParser from 'cookie-parser';
+import cookieSession from 'cookie-session';
+import cors from 'cors';
 
 // React
 import React from 'react';
@@ -35,6 +38,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(express.static('build/public'));
+app.use(cookieParser());
+app.use(cors(corsOptions));
 
 // Connect to MongoDB Atlas
 mongoose
@@ -47,6 +52,37 @@ mongoose
     .then(() => console.log('Database connected...'))
     .catch((err) => console.log(err));
 
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+};
+
+class Session {
+    constructor(req, res) {
+        this.req = req;
+        this.res = res;
+    }
+
+    update(user) {
+        if (!user) {
+            return;
+        }
+
+        const cookieOptions = {
+            httpOnly: true,
+            // secure: true,
+        };
+        this.res.cookie('userId', user.id, cookieOptions);
+    }
+}
+
+const sessionMiddleware = (req, res, next) => {
+    req.session = new Session(req, res);
+    next();
+};
+
+app.use(sessionMiddleware);
+
 // Defining Apollo Server
 const server = new ApolloServer({
     typeDefs,
@@ -54,19 +90,49 @@ const server = new ApolloServer({
     context: ({ req, res }) => ({ req, res }),
 });
 
-server.applyMiddleware({ app });
-app.get('/playground', expressPlayground({ endpoint: '/graphql' }));
+server.applyMiddleware({
+    app,
+    path: '/graphql',
+    cors: corsOptions,
+});
+app.get(
+    '/playground',
+    expressPlayground({
+        endpoint: '/graphql',
+        settings: {
+            'request.credentials': 'include',
+        },
+    }),
+);
 
 // Passport Authentication
-passport.serializeUser(function (user, cb) {
-    cb(null, user);
+app.use(
+    cookieSession({
+        maxAge: 24 * 60 * 60 * 1000,
+        keys: process.env.SECRET,
+    }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, cb) => {
+    cb(null, user.id);
 });
 
-passport.deserializeUser(function (obj, cb) {
-    cb(null, obj);
+passport.deserializeUser(async (id, cb) => {
+    try {
+        const user = User.findById(id);
+
+        if (!user) {
+            return cb(new Error('User not found'));
+        }
+
+        cb(null, user);
+    } catch (error) {
+        cb(error);
+    }
 });
 
-app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(
     require('express-session')({
@@ -75,9 +141,6 @@ app.use(
         saveUninitialized: true,
     }),
 );
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Github Passport ==============================
 passport.use(
@@ -134,7 +197,6 @@ app.get(
 // Github Passport ==============================
 
 // Google Passport ==============================
-
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get(
     '/auth/google/callback',
@@ -190,14 +252,17 @@ passport.use(
 app.get('*', (req, res) => {
     const context = {};
 
+    const token = req.cookies['_UTId'];
+
     const client = new ApolloClient({
         ssrMode: true,
+        credentials: 'include',
         link: createHttpLink({
             uri: 'http://localhost:3000/graphql',
             fetch: fetch,
             credentials: 'same-origin',
             headers: {
-                cookie: req.header('Cookie'),
+                cookie: req.header('Cookies'),
             },
         }),
         cache: new InMemoryCache(),
@@ -240,6 +305,7 @@ app.get('*', (req, res) => {
     getDataFromTree(app).then(() => {
         res.status(200);
         res.send(`${markup}`);
+        res.end();
     });
 });
 

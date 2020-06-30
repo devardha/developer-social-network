@@ -85,14 +85,14 @@ function RegisterPage() {
                                 <div className="social-login">
                                     <a
                                         href="http://localhost:3000/auth/google"
-                                        className="social-login-btn"
+                                        className="social-login-btn btn-disabled"
                                     >
                                         <i className="google-icon"></i>
                                         <span>Google</span>
                                     </a>
                                     <a
                                         href="http://localhost:3000/auth/github"
-                                        className="social-login-btn"
+                                        className="social-login-btn btn-disabled"
                                     >
                                         <img
                                             className="github-icon"
@@ -138,6 +138,7 @@ function RegisterPage() {
                                         id="email"
                                         {...getFieldProps('email')}
                                         error={errors.email}
+                                        className={errors.username ? 'input-error' : ''}
                                     />
                                 </Field>
                                 <Field>
@@ -154,6 +155,7 @@ function RegisterPage() {
                                         id="password"
                                         {...getFieldProps('password')}
                                         error={errors.password}
+                                        className={errors.username ? 'input-error' : ''}
                                     />
                                 </Field>
                                 <p className="message">
@@ -177,7 +179,14 @@ const RegisterPageStyled = Styled.div`
     justify-content:center;
     align-items:center;
     height:100vh;
+    background-color:#f33584;
 
+    .btn-disabled{
+        cursor: default !important;
+        background: #f9f9f9 !important;
+        color: #999 !important;
+        pointer-events: none;
+    }
     .alert{
         background: #ffeff6;
         padding: 0 1rem;

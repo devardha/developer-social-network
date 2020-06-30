@@ -13,10 +13,15 @@ const typeDefs = gql`
         createdAt: String
         status: [String]
     }
+    type Me {
+        id: ID!
+        username: String!
+    }
 
     type Query {
         users: [User]
         user(id: ID!): User!
+        me: User!
     }
 
     type Mutation {

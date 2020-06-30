@@ -12,9 +12,17 @@ const resolvers = {
         user: (parent, { id }, context) => {
             return User.findById(id);
         },
+        me: async (parent, args, { req, res }) => {
+            const token = req.cookies['_UTId'];
+            const decode = jwt.verify(token, process.env.SECRET);
+
+            const user = await User.findById(decode.id);
+
+            return user;
+        },
     },
     Mutation: {
-        register: async (parent, args, context) => {
+        register: async (parent, args, { res }) => {
             // Check existing user
             const user = await User.findOne({ username: args.username });
 
@@ -35,9 +43,16 @@ const resolvers = {
                 expiresIn: 86400,
             });
 
+            const cookieOptions = {
+                httpOnly: true,
+                // secure: true,
+            };
+
+            res.cookie('_UTId', token, cookieOptions);
+
             return token;
         },
-        login: async (parent, args, context) => {
+        login: async (parent, args, { res }) => {
             // Check existing user
             const user = await User.findOne({ username: args.username });
 
@@ -51,9 +66,18 @@ const resolvers = {
                 throw new AuthenticationError('Email or password invalid');
             }
 
-            return jwt.sign({ id: user._id }, process.env.SECRET, {
+            const token = jwt.sign({ id: user._id }, process.env.SECRET, {
                 expiresIn: 86400,
             });
+
+            const cookieOptions = {
+                httpOnly: true,
+                // secure: true,
+            };
+
+            res.cookie('_UTId', token, cookieOptions);
+
+            return token;
         },
     },
 };

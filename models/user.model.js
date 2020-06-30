@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     followers: { type: Array },
     following: { type: Array },
     createdAt: { type: Date, default: Date.now },
-    status: { type: Array },
+    status: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Status' }],
     social_login: {
         github: { type: String },
         google: { type: String },
