@@ -1,13 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import Styled from '@emotion/styled';
 import Button from './Button';
+import axios from 'axios';
 import { Search } from 'react-feather';
 
 function Navbar() {
-    const isAuthenticated = false;
+    const [user, setUser] = useState();
 
-    const authUser = <div className="user-image"> </div>;
+    useEffect(() => {
+        axios('http://localhost:3000/api/auth/me').then((result) => setUser(result.data));
+    }, []);
+
+    const isAuthenticated = true;
+    const authUser = (
+        <>
+            <div className="user-image">
+                <div>{user ? user.username : ''}</div>;
+            </div>
+        </>
+    );
 
     const guessUser = (
         <>
@@ -125,6 +137,13 @@ const NavbarStyled = Styled.div`
             height:35px;
             border-radius:50%;
             background-color:#000;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
         }
 
         .btn{

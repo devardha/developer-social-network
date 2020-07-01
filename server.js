@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
 
 // React
 import React from 'react';
@@ -20,7 +21,7 @@ import { ApolloProvider } from '@apollo/react-common';
 import { ApolloClient } from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { getDataFromTree } from '@apollo/react-ssr';
+import { getDataFromTree, renderToStringWithData } from '@apollo/react-ssr';
 import { ApolloServer } from 'apollo-server-express';
 import passport from 'passport';
 import User from './models/user.model';
@@ -35,6 +36,11 @@ const expressPlayground = require('graphql-playground-middleware-express').defau
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+};
 
 app.use(bodyParser.json());
 app.use(express.static('build/public'));
@@ -51,11 +57,6 @@ mongoose
     })
     .then(() => console.log('Database connected...'))
     .catch((err) => console.log(err));
-
-const corsOptions = {
-    origin: 'http://localhost:3000',
-    credentials: true,
-};
 
 class Session {
     constructor(req, res) {
@@ -82,8 +83,18 @@ const sessionMiddleware = (req, res, next) => {
 };
 
 app.use(sessionMiddleware);
+app.use((req, res, next) => {
+    const token = req.cookies['_UTId'];
+    try {
+        const decode = jwt.verify(token, process.env.SECRET);
 
-// Defining Apollo Server
+        if (!req.userID) {
+            req.userID = decode.id;
+        }
+    } catch {}
+    next();
+});
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -92,7 +103,6 @@ const server = new ApolloServer({
 
 server.applyMiddleware({
     app,
-    path: '/graphql',
     cors: corsOptions,
 });
 app.get(
@@ -249,18 +259,43 @@ passport.use(
 );
 // Google Passport ==============================
 
+// API Routes
+const auth = (req, res, next) => {
+    const token = req.cookies['_UTId'];
+
+    if (!token) {
+        return res.status(401).json({ msg: 'No token, authorization denied' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET);
+
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(400).json({ msg: 'Token is invalid' });
+    }
+};
+
+app.get('/api/auth/me', auth, (req, res) => {
+    User.findById(req.user.id)
+        .select('-password')
+        .then((user) => res.json(user));
+});
+
 app.get('*', (req, res) => {
     const context = {};
 
-    const token = req.cookies['_UTId'];
-
     const client = new ApolloClient({
-        ssrMode: true,
+        ssrMode: false,
         credentials: 'include',
         link: createHttpLink({
             uri: 'http://localhost:3000/graphql',
             fetch: fetch,
-            credentials: 'same-origin',
+            credentials: 'include',
+            fetchOptions: {
+                credentials: 'include',
+            },
             headers: {
                 cookie: req.header('Cookies'),
             },
@@ -302,7 +337,7 @@ app.get('*', (req, res) => {
         res.status(404);
     }
 
-    getDataFromTree(app).then(() => {
+    renderToStringWithData(app).then(() => {
         res.status(200);
         res.send(`${markup}`);
         res.end();

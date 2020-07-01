@@ -2,23 +2,25 @@ import User from '../models/user.model';
 import { AuthenticationError } from 'apollo-server-express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import fetch from 'node-fetch';
 
 const resolvers = {
     Query: {
-        users: (parent, args, context) => {
-            const posts = User.find({});
-            return posts;
+        users: async (parent, args, { req }) => {
+            try {
+                const posts = User.find({});
+
+                return posts;
+            } catch (error) {
+                throw error;
+            }
         },
         user: (parent, { id }, context) => {
             return User.findById(id);
         },
         me: async (parent, args, { req, res }) => {
-            const token = req.cookies['_UTId'];
-            const decode = jwt.verify(token, process.env.SECRET);
-
-            const user = await User.findById(decode.id);
-
-            return user;
+            const result = await fetch('http://localhost:3000/api/auth/me');
+            return null;
         },
     },
     Mutation: {
